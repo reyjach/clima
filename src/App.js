@@ -2,17 +2,53 @@ import React ,{Component} from 'react';
 import Header from './componentes/Header';
 import Formulario from './componentes/Formulario';
 import Error from './componentes/Error'
+import Clima from './componentes/Clima'
 
 class App extends Component{
 
   state = {
-    error:''
+    error: '',
+    consulta: {},
+    resultado: {}
+  }
+
+  componentDidUpdate(){
+    this.consultarApi();
   }
 
   componentDidMount(){
     this.setState({
       error:false
     })
+  }
+
+  consultarApi = () =>{
+    const {ciudad,pais} = this.state.consulta;
+    if(!ciudad || !pais) return null;
+
+    //leer la URL y agregar el api key
+
+
+    const appId= '198addffd476b8604134b211fe79cdf0';
+    let url = `http://api.openweathermap.org/data/2.5/weather?q=${ciudad},${pais}&appid=${appId}`;
+
+    //console.log(url);
+
+    // query con fetch api
+    fetch(url)
+    .then(respuesta => {
+      return respuesta.json();
+    })
+    .then(datos => {
+      this.setState({
+        resultado:datos
+      })
+    })
+    .catch(error => {
+      console.log(error)
+    })
+    
+    //console.log(ciudad)
   }
 
   datosConsulta= respuesta => {
@@ -23,7 +59,10 @@ class App extends Component{
         error:true
       })
     }else{
-      console.log('todo correcto')
+      this.setState({
+        consulta:respuesta,
+        error:false
+      })
     }
   }
   
@@ -35,6 +74,8 @@ class App extends Component{
 
     if (error){
       resultado = <Error mensaje="Ambos campos son obligatorios"></Error>
+    }else{
+      resultado = <Clima resultado={this.state.resultado}></Clima>
     }
 
     return (
